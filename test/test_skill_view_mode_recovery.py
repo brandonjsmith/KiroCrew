@@ -131,6 +131,9 @@ def test_the_boot_drain_records_a_backlog_in_one_ledger_write(native_tree, monke
 
     monkeypatch.setattr(projection, "_record_view_ledger_entries", counted)
     monkeypatch.setattr(projection, "_DRAIN_BATCH_PAUSE_SECS", 0)
+    # The write count is the subject, not the time budget: a loaded runner that
+    # spends the per-batch budget splits the work into an extra batch and write.
+    monkeypatch.setattr(projection, "_PRUNE_MAX_SECONDS_PER_RUN", 3600.0)
 
     assert projection.drain_stale_aliases() == 3
     assert not any((metadata / f"{view}.json").exists() for view in views)
